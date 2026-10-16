@@ -8,23 +8,23 @@
 -- Helpers de sessão
 -- ---------------------------------------------------------------------
 create or replace function meu_papel() returns papel_usuario
-language sql stable security definer set search_path = public as $$
+language sql stable security definer set search_path = public, extensions as $$
   select papel from usuarios where id = auth.uid() and ativo
 $$;
 
 create or replace function minha_equipe() returns uuid
-language sql stable security definer set search_path = public as $$
+language sql stable security definer set search_path = public, extensions as $$
   select equipe_id from usuarios where id = auth.uid() and ativo
 $$;
 
 create or replace function ve_tudo() returns boolean
-language sql stable security definer set search_path = public as $$
+language sql stable security definer set search_path = public, extensions as $$
   select coalesce(meu_papel() in ('gestor', 'sdr'), false)
 $$;
 
 -- Telefone só com dígitos e DDI. Sem DDI, assume Brasil (+55), como o CV.
 create or replace function normalizar_telefone(t text) returns text
-language sql immutable as $$
+language sql immutable set search_path = public as $$
   select case
     when t is null or regexp_replace(t, '\D', '', 'g') = '' then null
     when left(trim(t), 1) = '+' then regexp_replace(t, '\D', '', 'g')
@@ -34,7 +34,7 @@ language sql immutable as $$
 $$;
 
 create or replace function situacao_inicio(p_objeto text default 'lead') returns uuid
-language sql stable security definer set search_path = public as $$
+language sql stable security definer set search_path = public, extensions as $$
   select id from workflow_situacoes where objeto = p_objeto and flag_inicio and ativo
 $$;
 
@@ -43,7 +43,7 @@ $$;
 -- O primeiro usuário do sistema vira gestor (bootstrap).
 -- ---------------------------------------------------------------------
 create or replace function handle_new_user() returns trigger
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = public, extensions as $$
 declare
   v_papel papel_usuario;
 begin
@@ -70,7 +70,7 @@ create trigger on_auth_user_created
 
 -- Ninguém muda o próprio papel ou equipe; só o gestor.
 create or replace function usuarios_guarda() returns trigger
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = public, extensions as $$
 begin
   if auth.uid() is not null and coalesce(meu_papel()::text, '') <> 'gestor'
      and (new.papel is distinct from old.papel or new.equipe_id is distinct from old.equipe_id
@@ -88,7 +88,7 @@ create trigger usuarios_guarda before update on usuarios
 -- Leads · antes de gravar
 -- ---------------------------------------------------------------------
 create or replace function leads_antes() returns trigger
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = public, extensions as $$
 declare
   v_sit       workflow_situacoes;
   v_papel     papel_usuario := meu_papel();
@@ -182,7 +182,7 @@ create trigger leads_antes before insert or update on leads
 -- Leads · depois de gravar: históricos de situação e de responsáveis
 -- ---------------------------------------------------------------------
 create or replace function leads_depois() returns trigger
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = public, extensions as $$
 declare
   v_motivo text := coalesce(nullif(current_setting('lc.motivo_resp', true), ''),
                             case when tg_op = 'INSERT' then 'cadastro' else 'manual' end);
@@ -217,7 +217,7 @@ create trigger leads_depois after insert or update on leads
 -- Interações: atualiza última interação e o primeiro contato do corretor
 -- ---------------------------------------------------------------------
 create or replace function interacoes_depois() returns trigger
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = public, extensions as $$
 begin
   perform set_config('lc.sistema', 'on', true);
   update leads l set
@@ -238,7 +238,7 @@ create trigger interacoes_depois after insert on interacoes
 -- só para frente e nunca tirando o lead de Fim ou Cancelado.
 -- ---------------------------------------------------------------------
 create or replace function mover_lead_por_automacao(p_lead bigint, p_automacao text)
-returns void language plpgsql security definer set search_path = public as $$
+returns void language plpgsql security definer set search_path = public, extensions as $$
 declare
   v_alvo  workflow_situacoes;
   v_atual workflow_situacoes;
@@ -256,7 +256,7 @@ begin
 end $$;
 
 create or replace function tarefas_antes() returns trigger
-language plpgsql as $$
+language plpgsql set search_path = public as $$
 begin
   if new.situacao = 'concluida' and (tg_op = 'INSERT' or old.situacao is distinct from 'concluida') then
     new.concluida_em := now();
@@ -270,7 +270,7 @@ create trigger tarefas_antes before insert or update on tarefas
   for each row execute function tarefas_antes();
 
 create or replace function tarefas_depois() returns trigger
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = public, extensions as $$
 begin
   if new.tipo = 'visita' then
     if new.situacao in ('pendente', 'andamento') then
@@ -291,9 +291,9 @@ create trigger tarefas_depois after insert or update of situacao on tarefas
 -- duplicado: ganha uma conversão e, se estava cancelado, é reativado.
 -- ---------------------------------------------------------------------
 create or replace function registrar_lead(p jsonb)
-returns jsonb language plpgsql security definer set search_path = public as $$
+returns jsonb language plpgsql security definer set search_path = public, extensions as $$
 declare
-  v_email    citext := nullif(lower(trim(p ->> 'email')), '');
+  v_email    extensions.citext := nullif(lower(trim(p ->> 'email')), '');
   v_tel      text   := normalizar_telefone(p ->> 'telefone');
   v_meta     text   := nullif(trim(p ->> 'identificador_meta'), '');
   v_origem   text   := coalesce(nullif(p ->> 'origem', ''), 'ND');

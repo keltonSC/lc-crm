@@ -1,7 +1,7 @@
 -- =====================================================================
 -- LC CRM · núcleo: usuários, equipes, empreendimentos, funil e leads
 -- =====================================================================
-create extension if not exists citext;
+create extension if not exists citext with schema extensions;
 
 -- ---------------------------------------------------------------------
 -- Tipos
@@ -29,7 +29,7 @@ create table equipes (
 create table usuarios (
   id          uuid primary key references auth.users (id) on delete cascade,
   nome        text not null,
-  email       citext not null unique,
+  email       extensions.citext not null unique,
   telefone    text,
   papel       papel_usuario not null default 'corretor',
   equipe_id   uuid references equipes (id) on delete set null,
@@ -114,7 +114,7 @@ create unique index workflow_automacao_u on workflow_situacoes (objeto, automaca
 create table leads (
   id                               bigint generated always as identity primary key,
   nome                             text not null default 'Sem nome',
-  email                            citext,
+  email                            extensions.citext,
   telefone                         text,
   identificador_meta               text,
   origem                           text not null default 'ND' references origens (codigo),

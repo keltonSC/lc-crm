@@ -41,7 +41,7 @@ create policy usuarios_gestor on usuarios for all to authenticated
 
 -- Leads
 create or replace function pode_ver_lead(l leads) returns boolean
-language sql stable security definer set search_path = public as $$
+language sql stable security definer set search_path = public, extensions as $$
   select case meu_papel()
     when 'gestor'   then true
     when 'sdr'      then true
@@ -97,6 +97,10 @@ create policy tarefas_excluir on tarefas for delete to authenticated
 -- Históricos e conversões são escritos só pelos triggers e pela
 -- função registrar_lead (security definer): sem policy de escrita.
 
--- Funções auxiliares não ficam expostas ao anônimo
+-- Funções auxiliares: fora do alcance do anônimo; a automação de visita
+-- só roda por dentro dos triggers.
 revoke execute on function meu_papel(), minha_equipe(), ve_tudo(), pode_ver_lead(leads),
-  mover_lead_por_automacao(bigint, text) from anon;
+  situacao_inicio(text) from public, anon;
+grant execute on function meu_papel(), minha_equipe(), ve_tudo(), pode_ver_lead(leads),
+  situacao_inicio(text) to authenticated, service_role;
+revoke execute on function mover_lead_por_automacao(bigint, text) from public, anon, authenticated;
