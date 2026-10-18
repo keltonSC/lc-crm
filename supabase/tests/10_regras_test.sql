@@ -16,19 +16,24 @@ begin
   perform set_config('request.jwt.claim.sub', '', false);
 end $$;
 
--- Usuários: o primeiro vira gestor
+-- Usuários: papel e equipe vêm do convite, nunca dos metadados do cadastro
+insert into convites (email, nome, papel, equipe_id) values
+  ('gestor@lc.com',  'Gestora',       'gestor',   null),
+  ('lider.w@lc.com', 'Líder Winners', 'lider',    (select id from equipes where nome='Winners')),
+  ('ana@lc.com',     'Ana',           'corretor', (select id from equipes where nome='Winners')),
+  ('bruno@lc.com',   'Bruno',         'corretor', (select id from equipes where nome='Winners')),
+  ('caio@lc.com',    'Caio',          'corretor', (select id from equipes where nome='Furiosos'));
 insert into auth.users (email, raw_user_meta_data) values
-  ('gestor@lc.com', '{"nome":"Gestora"}'),
-  ('lider.w@lc.com', jsonb_build_object('nome','Líder Winners','papel','lider','equipe_id',(select id from equipes where nome='Winners'))),
-  ('ana@lc.com',     jsonb_build_object('nome','Ana','papel','corretor','equipe_id',(select id from equipes where nome='Winners'))),
-  ('bruno@lc.com',   jsonb_build_object('nome','Bruno','papel','corretor','equipe_id',(select id from equipes where nome='Winners'))),
-  ('caio@lc.com',    jsonb_build_object('nome','Caio','papel','corretor','equipe_id',(select id from equipes where nome='Furiosos')));
+  ('gestor@lc.com', '{}'), ('lider.w@lc.com', '{}'), ('ana@lc.com', '{}'), ('bruno@lc.com', '{}'), ('caio@lc.com', '{}'),
+  ('intruso@x.com', '{"papel":"gestor","nome":"Intruso"}');
 
 do $$ begin
-  assert (select papel from usuarios where email='gestor@lc.com') = 'gestor', 'primeiro usuário deveria ser gestor';
+  assert (select papel from usuarios where email='gestor@lc.com') = 'gestor', 'convite de gestor';
   assert (select papel from usuarios where email='ana@lc.com') = 'corretor', 'ana deveria ser corretora';
+  assert (select papel = 'corretor' and not ativo from usuarios where email='intruso@x.com'), 'sem convite: inativo e sem papel de gestor';
+  assert (select count(*) from convites where usado_em is null) = 0, 'convites marcados como usados';
 end $$;
-\echo ok 01 bootstrap de usuários
+\echo ok 01 usuários entram pelo convite; cadastro sem convite fica inativo
 
 insert into empreendimentos (nome, bairro) values ('BM900', 'Meireles'), ('Uni Bangalôs', 'Aquiraz');
 

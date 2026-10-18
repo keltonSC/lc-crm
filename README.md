@@ -21,7 +21,7 @@ Testes do banco num Postgres local:
 PGHOST=/tmp PGPORT=54322 ./supabase/tests/run.sh
 ```
 
-O primeiro usuário que entrar no sistema vira **gestor**. Os demais são convidados pela tela Equipe.
+Acesso só por convite: o gestor cria o convite na tela **Equipe** (papel e equipe ficam no convite) e manda o link pelo WhatsApp. A pessoa abre **Primeiro acesso** no login e cria a própria senha. Quem se cadastrar sem convite entra inativo.
 
 ## Variáveis de ambiente
 
@@ -29,5 +29,4 @@ O primeiro usuário que entrar no sistema vira **gestor**. Os demais são convid
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase › Project Settings › API |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase › Project Settings › API |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase › Project Settings › API (só no servidor, usada para convidar usuários) |
 | `NEXT_PUBLIC_LOGIN_GOOGLE` | `on` para mostrar o login com Google (configurar o provedor no Supabase antes) |

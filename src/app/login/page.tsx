@@ -1,7 +1,7 @@
 import { FormLogin } from "./form";
 
 const ERROS: Record<string, string> = {
-  inativo: "Seu acesso está desativado. Fale com a gestão.",
+  inativo: "Seu acesso ainda não foi liberado. Peça um convite à gestão da LC.",
   google: "Não foi possível entrar com o Google.",
   link: "O link expirou ou já foi usado. Peça um novo.",
 };
@@ -9,9 +9,9 @@ const ERROS: Record<string, string> = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string; erro?: string }>;
+  searchParams: Promise<{ next?: string; erro?: string; primeiro?: string; email?: string }>;
 }) {
-  const { next, erro } = await searchParams;
+  const { next, erro, primeiro, email } = await searchParams;
   const google = process.env.NEXT_PUBLIC_LOGIN_GOOGLE === "on";
 
   return (
@@ -39,11 +39,11 @@ export default async function LoginPage({
             <span className="text-sm text-stone-600">LC Imóveis</span>
           </div>
           <h1 className="text-2xl font-semibold">Acesse sua conta</h1>
-          <p className="mt-1 text-sm text-stone-500">Entre com seu e-mail da LC. Seu perfil abre automaticamente.</p>
+          <p className="mt-1 text-sm text-stone-500">Use seu e-mail cadastrado. Seu perfil abre automaticamente.</p>
           {erro && ERROS[erro] && (
             <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{ERROS[erro]}</p>
           )}
-          <FormLogin next={next ?? "/"} google={google} />
+          <FormLogin next={next ?? "/"} google={google} primeiro={primeiro === "1"} emailInicial={email ?? ""} />
         </div>
       </section>
     </main>

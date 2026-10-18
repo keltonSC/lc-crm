@@ -32,6 +32,30 @@ export async function esqueciSenha(_: EstadoLogin, form: FormData): Promise<Esta
   return { aviso: "Se o e-mail estiver cadastrado, você vai receber um link para criar uma nova senha." };
 }
 
+/** Primeiro acesso: a pessoa convidada cria a própria senha. */
+export async function primeiroAcesso(_: EstadoLogin, form: FormData): Promise<EstadoLogin> {
+  const email = String(form.get("email") ?? "").trim().toLowerCase();
+  const senha = String(form.get("senha") ?? "");
+  if (!email) return { erro: "Informe o e-mail que recebeu o convite." };
+  if (senha.length < 8) return { erro: "Crie uma senha com pelo menos 8 caracteres." };
+
+  const origem = (await headers()).get("origin") ?? "";
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password: senha,
+    options: { emailRedirectTo: `${origem}/auth/callback` },
+  });
+  if (error) {
+    if (error.message.toLowerCase().includes("already")) return { erro: "Esse e-mail já tem senha. Use “Entrar”." };
+    if (error.message.toLowerCase().includes("rate")) return { erro: "Muitas tentativas. Aguarde alguns minutos." };
+    return { erro: "Não foi possível criar o acesso agora." };
+  }
+  // Com confirmação de e-mail desligada, a sessão já vem pronta.
+  if (data.session) redirect("/");
+  return { aviso: "Pronto! Enviamos um e-mail de confirmação. Toque no link e depois entre com sua senha." };
+}
+
 export async function entrarComGoogle() {
   const origem = (await headers()).get("origin") ?? "";
   const supabase = await createClient();

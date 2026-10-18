@@ -3,7 +3,14 @@
 import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import { PAPEL_NOME, type Equipe, type Papel, type Usuario } from "@/lib/types";
 import { iniciais } from "@/lib/format";
-import { convidarUsuario, criarEquipe, salvarEquipe, salvarUsuario, type Resultado } from "./actions";
+import {
+  convidarUsuario,
+  criarEquipe,
+  salvarEquipe,
+  salvarUsuario,
+  type Resultado,
+  type ResultadoConvite,
+} from "./actions";
 
 const PAPEIS = Object.keys(PAPEL_NOME) as Papel[];
 
@@ -77,7 +84,7 @@ export function LinhaEquipe({ equipe, membros }: { equipe: Equipe; membros: Usua
 }
 
 export function FormConvite({ equipes }: { equipes: Equipe[] }) {
-  const [estado, acao, enviando] = useActionState<Resultado, FormData>(convidarUsuario, {});
+  const [estado, acao, enviando] = useActionState<ResultadoConvite, FormData>(convidarUsuario, {});
   const ref = useRef<HTMLFormElement>(null);
   useEffect(() => {
     if (estado.ok) ref.current?.reset();
@@ -101,8 +108,18 @@ export function FormConvite({ equipes }: { equipes: Equipe[] }) {
         </select>
       </div>
       {estado.erro && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{estado.erro}</p>}
-      {estado.ok && <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">{estado.ok}</p>}
-      <button className="btn-primario w-full" disabled={enviando}>{enviando ? "Enviando…" : "Enviar convite"}</button>
+      {estado.ok && (
+        <div className="space-y-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+          <p>{estado.ok} Agora mande o link para a pessoa:</p>
+          {estado.whatsapp && (
+            <a href={estado.whatsapp} target="_blank" rel="noopener" className="btn w-full bg-emerald-600 text-white hover:bg-emerald-700">
+              Enviar pelo WhatsApp
+            </a>
+          )}
+          {estado.link && <p className="break-all text-xs text-emerald-900">{estado.link}</p>}
+        </div>
+      )}
+      <button className="btn-primario w-full" disabled={enviando}>{enviando ? "Criando…" : "Criar convite"}</button>
     </form>
   );
 }
