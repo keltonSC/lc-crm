@@ -1,3 +1,8 @@
 [build]
   command = "npm run build"
   publish = ".next"
+
+# Usado pelo botão "Deploy to Netlify" para já criar o site com as variáveis.
+[template.environment]
+  NEXT_PUBLIC_SUPABASE_URL = "URL do projeto Supabase"
+  NEXT_PUBLIC_SUPABASE_ANON_KEY = "Chave publicável do Supabase"
