@@ -23,6 +23,8 @@ PGHOST=/tmp PGPORT=54322 ./supabase/tests/run.sh
 
 Acesso só por convite: o gestor cria o convite na tela **Equipe** (papel e equipe ficam no convite) e manda o link pelo WhatsApp. A pessoa abre **Primeiro acesso** no login e cria a própria senha. Quem se cadastrar sem convite entra inativo.
 
+Distribuição automática: o gestor liga a roleta em **Distribuição**. Lead novo sem corretor vai para a equipe/corretor que está há mais tempo sem receber (só quem está online, se a opção estiver ligada); sem ninguém disponível ele espera na fila. A regra vive no banco (`distribuir_lead`, trigger em `leads`). Corretores marcam **Online** no menu do perfil.
+
 ## Variáveis de ambiente
 
 | Nome | Onde |

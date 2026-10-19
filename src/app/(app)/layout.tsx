@@ -6,13 +6,19 @@ import { iniciais } from "@/lib/format";
 import { sair } from "@/app/login/actions";
 import { NavLinks } from "@/components/nav-links";
 import { BuscaGlobal } from "@/components/busca-global";
+import { BotaoOnline } from "./botao-online";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const eu = await usuarioAtual();
   const itens = [
     { href: "/leads", nome: "Leads" },
     { href: "/tarefas", nome: "Agenda" },
-    ...(eu.papel === "gestor" ? [{ href: "/equipe", nome: "Equipe" }] : []),
+    ...(eu.papel === "gestor"
+      ? [
+          { href: "/equipe", nome: "Equipe" },
+          { href: "/distribuicao", nome: "Distribuição" },
+        ]
+      : []),
   ];
 
   return (
@@ -42,6 +48,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 <p className="truncate text-sm font-medium">{eu.nome}</p>
                 <p className="text-xs text-stone-500">{PAPEL_NOME[eu.papel]}</p>
               </div>
+              {eu.papel === "corretor" && <BotaoOnline inicial={eu.online} />}
               <form action={sair}>
                 <button className="w-full rounded-md px-2 py-1.5 text-left text-sm hover:bg-stone-100">Sair</button>
               </form>
