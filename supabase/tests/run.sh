@@ -7,3 +7,5 @@ $PSQL -d postgres -c "drop database if exists lc_crm_test" -c "create database l
 $PSQL -d lc_crm_test -f tests/00_supabase_shim.sql
 for f in migrations/*.sql; do echo "aplicando $f"; $PSQL -d lc_crm_test -f "$f"; done
 $PSQL -d lc_crm_test -f tests/10_regras_test.sql
+$PSQL -d lc_crm_test -f tests/20_distribuicao_test.sql
+$PSQL -d lc_crm_test -f tests/30_entradas_test.sql

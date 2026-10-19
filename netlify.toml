@@ -6,3 +6,5 @@
 [template.environment]
   NEXT_PUBLIC_SUPABASE_URL = "URL do projeto Supabase"
   NEXT_PUBLIC_SUPABASE_ANON_KEY = "Chave publicável do Supabase"
+  SUPABASE_SERVICE_ROLE_KEY = "Chave service_role do Supabase (só servidor)"
+  LEADS_API_TOKEN = "Token longo e aleatório para a API de entrada de leads"

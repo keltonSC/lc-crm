@@ -1,7 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLICAS = ["/login", "/auth"];
+// /api/leads/entrada e /api/webhooks têm autenticação própria (token / assinatura).
+const PUBLICAS = ["/login", "/auth", "/api/leads/entrada", "/api/webhooks"];
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });

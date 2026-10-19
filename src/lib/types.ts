@@ -16,6 +16,7 @@ export type Usuario = {
   equipe_id: string | null;
   creci: string | null;
   ativo: boolean;
+  online: boolean;
 };
 
 export type Equipe = { id: string; nome: string; lider_id: string | null; ativa: boolean };
