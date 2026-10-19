@@ -42,3 +42,7 @@ Distribuição automática: o gestor liga a roleta em **Distribuição**. Lead n
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase › Project Settings › API (só servidor, nunca `NEXT_PUBLIC_`) |
 | `LEADS_API_TOKEN` | Token longo e aleatório que as integrações enviam como Bearer |
 | `META_VERIFY_TOKEN`, `META_APP_SECRET`, `META_PAGE_TOKEN` | App da Meta (webhook de Lead Ads) |
+
+## Projeto Supabase novo (sem CLI)
+
+Cole `supabase/manual/aplicar-tudo.sql` no **SQL Editor** de um projeto vazio e execute; depois rode `supabase/manual/verificar.sql` (tudo deve dar `true`). O arquivo é a concatenação de `supabase/migrations/*.sql`: se criar uma migration nova, gere de novo com `cat`.
